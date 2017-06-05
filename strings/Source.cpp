@@ -226,57 +226,100 @@ void dodb()
 	while( !quitting );
 }
 
+class SlaveA
+{
+public:
+	SlaveA()
+	{
+		chili::print( "Default Constructing SlaveA\n" );
+	}
+	~SlaveA()
+	{
+		chili::print( "Destructing SlaveA\n" );
+	}
+	SlaveA( const SlaveA& source )
+	{
+		chili::print( "Copy Constructing SlaveA\n" );
+	}
+};
+
+class SlaveB
+{
+public:
+	SlaveB()
+		:
+		y( 69 )
+	{
+		chili::print( "Default Constructing SlaveB\n" );
+	}
+	SlaveB& operator=( const SlaveB& )
+	{
+		return *this;
+	}
+	~SlaveB()
+	{
+		chili::print( "Destructing SlaveB\n" );
+	}
+	const int y;
+};
+
+class SlaveC
+{
+public:
+	SlaveC( int x )
+	{}
+	SlaveC( const SlaveC& source )
+	{
+		chili::print( "Copy Constructing SlaveC\n" );
+	}
+	~SlaveC()
+	{
+		chili::print( "Destructing SlaveC\n" );
+	}
+};
+
+class Master
+{
+public:
+	Master()
+	{
+		chili::print( "Default Constructing Master\n" );
+	}
+	explicit Master( int x )
+		:
+		x( x )
+	{
+		chili::print( "int Param Constructing Master\n" );
+	}
+	Master( const Master& source )
+		:
+		a( source.a ),
+		b( source.b ),
+		x( source.x )
+	{
+		chili::print( "Copy Constructing Master\n" );
+	}
+	~Master()
+	{
+		chili::print( "Destructing Master\n" );
+	}
+private:
+	SlaveA a;
+	SlaveB b;
+	int x;
+};
+
+void Func( Master m )
+{
+}
+
 int main()
 {
-	char buffer[256];
-	chili::print( "\nEnter file name: " );
-	chili::read( buffer,sizeof( buffer ) );
-	std::ifstream warp_file( buffer );
-
-	warp_file.seekg( 0,std::ios_base::end );
-	const int file_size = warp_file.tellg();
-	warp_file.seekg( 0,std::ios_base::beg );
-	char* warp_string = new char[file_size+1];
-
-	// read file into array
-	int i = 0;
-	for( char c = warp_file.get(); warp_file.good(); c = warp_file.get() )
 	{
-		warp_string[i++] = c;
+		Master n( 69.0f );
+		Master doob{ 420.0f };
+		Func( doob );
 	}
-	warp_string[i] = 0;
-
-	// repeatedly display random snippets until user quits
-	const int snippet_size = 400;
-	std::minstd_rand rng( std::random_device{}() );
-	std::uniform_int_distribution<int> dist( 0,i - snippet_size );
-	bool quitting = false;
-
-	do
-	{
-		chili::print( "\n(r)ead a snippet or (q)uit?" );
-		switch( _getch() )
-		{
-		case 'r':
-		{
-			_putch( '\n' );
-			_putch( '\n' );
-			const int iStart = dist( rng );
-			for( int i = iStart; i < iStart + snippet_size; i++ )
-			{
-				_putch( warp_string[i] );
-			}
-			_putch( '\n' );
-			break;
-		}
-		case 'q':
-			quitting = true;
-			break;
-		}
-	}
-	while( !quitting );
-
-	delete [] warp_string;
-
+	while( !_kbhit() );
 	return 0;
 }
