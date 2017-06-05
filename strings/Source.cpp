@@ -243,83 +243,49 @@ public:
 	}
 };
 
-class SlaveB
+class DynamicIntArray
 {
 public:
-	SlaveB()
+	DynamicIntArray( int size )
 		:
-		y( 69 )
-	{
-		chili::print( "Default Constructing SlaveB\n" );
-	}
-	SlaveB& operator=( const SlaveB& )
-	{
-		return *this;
-	}
-	~SlaveB()
-	{
-		chili::print( "Destructing SlaveB\n" );
-	}
-	const int y;
-};
-
-class SlaveC
-{
-public:
-	SlaveC( int x )
+		size( size ),
+		pArray( new int[size] )
 	{}
-	SlaveC( const SlaveC& source )
+	DynamicIntArray( const DynamicIntArray& source ) = delete;
+	DynamicIntArray& operator=( const DynamicIntArray& source ) = delete;
+	~DynamicIntArray()
 	{
-		chili::print( "Copy Constructing SlaveC\n" );
+		delete pArray;
+		pArray = nullptr;
 	}
-	~SlaveC()
+	int& operator[]( int index )
 	{
-		chili::print( "Destructing SlaveC\n" );
+		return pArray[index];
 	}
-};
-
-class Master
-{
-public:
-	Master()
+	const int& operator[]( int index ) const
 	{
-		chili::print( "Default Constructing Master\n" );
-	}
-	explicit Master( int x )
-		:
-		x( x )
-	{
-		chili::print( "int Param Constructing Master\n" );
-	}
-	Master( const Master& source )
-		:
-		a( source.a ),
-		b( source.b ),
-		x( source.x )
-	{
-		chili::print( "Copy Constructing Master\n" );
-	}
-	~Master()
-	{
-		chili::print( "Destructing Master\n" );
+		return pArray[index];
 	}
 private:
-	SlaveA a;
-	SlaveB b;
-	int x;
+	int size = 0;
+	int* pArray = nullptr;
 };
-
-void Func( Master m )
-{
-}
 
 int main()
 {
-	{
-		Master n( 69.0f );
-		Master doob{ 420.0f };
-		Func( doob );
-	}
+	char buffer[256];
+
+	DynamicIntArray arr0( 5 );
+	arr0[0] = 69;
+	arr0[3] = 420;
+
+	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
+	chili::print( buffer );
+	
+	chili::print( "\narr0: " );
+	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
+	chili::print( buffer );
+
 	while( !_kbhit() );
 	return 0;
 }
