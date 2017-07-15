@@ -251,8 +251,25 @@ public:
 		size( size ),
 		pArray( new int[size] )
 	{}
-	DynamicIntArray( const DynamicIntArray& source ) = delete;
-	DynamicIntArray& operator=( const DynamicIntArray& source ) = delete;
+	DynamicIntArray( const DynamicIntArray& source )
+	{
+		*this = source;
+	}
+	DynamicIntArray& operator=( const DynamicIntArray& source )
+	{
+		// delete currently owned memory (if any)
+		delete pArray;
+		pArray = nullptr;
+		// allocate new array of same size as source array and set size to source size
+		pArray = new int[source.size];
+		size = source.size;
+		// copy values from source array to our new array
+		for( int i = 0; i < size; i++ )
+		{
+			(*this)[i] = source[i];
+		}
+		return *this;
+	}
 	~DynamicIntArray()
 	{
 		delete pArray;
@@ -279,10 +296,16 @@ int main()
 	arr0[0] = 69;
 	arr0[3] = 420;
 
+	chili::print( "Before bullshits, arr0[3]: " );
 	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
 	chili::print( buffer );
 	
-	chili::print( "\narr0: " );
+	{
+		DynamicIntArray arr1 = arr0;
+		arr1[3] = 1337;
+	}
+
+	chili::print( "\nAfter bullshits, arr0[3]: " );
 	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
 	chili::print( buffer );
 
