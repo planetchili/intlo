@@ -272,7 +272,9 @@ public:
 	}
 	~DynamicIntArray()
 	{
-		delete pArray;
+		// this was originally 'delete pArray' in the tutorial video
+		// but that is dumb because it is allocated with 'new int[]'
+		delete [] pArray;
 		pArray = nullptr;
 	}
 	int& operator[]( int index )
