@@ -1,6 +1,7 @@
 #include <conio.h>
 #include <fstream>
 #include <random>
+#include <vector>
 
 namespace chili
 {
@@ -143,39 +144,37 @@ namespace chili
 		void Load( const char* filename )
 		{
 			std::ifstream in( filename,std::ios::binary );
-			in.read( reinterpret_cast<char*>(&curNumberEntries),sizeof( curNumberEntries ) );
-			for( int i = 0; i < curNumberEntries; i++ )
+			int nEntries;
+			in.read( reinterpret_cast<char*>(&nEntries),sizeof( nEntries ) );
+			entries.resize( nEntries );
+			for( auto& e : entries )
 			{
-				entries[i].Deserialize( in );
+				e.Deserialize( in );
 			}
 		}
 		void Save( const char* filename ) const
 		{
 			std::ofstream out( filename,std::ios::binary );
-			out.write( reinterpret_cast<const char*>(&curNumberEntries),sizeof( curNumberEntries ) );
-			for( int i = 0; i < curNumberEntries; i++ )
+			const int size = entries.size();
+			out.write( reinterpret_cast<const char*>(&size),sizeof( size ) );
+			for( const Entry& e : entries )
 			{
-				entries[i].Serialize( out );
+				e.Serialize( out );
 			}
 		}
 		void Print() const
 		{
-			for( int i = 0; i < curNumberEntries; i++ )
+			for( const Entry& e : entries )
 			{
-				entries[i].Print();
+				e.Print();
 			}
 		}
 		void Add( const char* name,int val )
 		{
-			if( curNumberEntries < maxNumberEntries )
-			{
-				entries[curNumberEntries++] = { name,val };
-			}
+			entries.emplace_back( name,val );
 		}
 	private:
-		static constexpr int maxNumberEntries = 16;
-		Entry entries[maxNumberEntries];
-		int curNumberEntries = 0;
+		std::vector<Entry> entries;
 	};
 }
 
@@ -243,25 +242,26 @@ public:
 	}
 };
 
-class DynamicIntArray
+template<typename T>
+class DynamicArray
 {
 public:
-	DynamicIntArray( int size )
+	DynamicArray( int size )
 		:
 		size( size ),
-		pArray( new int[size] )
+		pArray( new T[size] )
 	{}
-	DynamicIntArray( const DynamicIntArray& source )
+	DynamicArray( const DynamicArray& source )
 	{
 		*this = source;
 	}
-	DynamicIntArray& operator=( const DynamicIntArray& source )
+	DynamicArray& operator=( const DynamicArray& source )
 	{
 		// delete currently owned memory (if any)
 		delete pArray;
 		pArray = nullptr;
 		// allocate new array of same size as source array and set size to source size
-		pArray = new int[source.size];
+		pArray = new T[source.size];
 		size = source.size;
 		// copy values from source array to our new array
 		for( int i = 0; i < size; i++ )
@@ -270,47 +270,28 @@ public:
 		}
 		return *this;
 	}
-	~DynamicIntArray()
+	~DynamicArray()
 	{
 		// this was originally 'delete pArray' in the tutorial video
 		// but that is dumb because it is allocated with 'new int[]'
 		delete [] pArray;
 		pArray = nullptr;
 	}
-	int& operator[]( int index )
+	T& operator[]( int index )
 	{
 		return pArray[index];
 	}
-	const int& operator[]( int index ) const
+	const T& operator[]( int index ) const
 	{
 		return pArray[index];
 	}
 private:
 	int size = 0;
-	int* pArray = nullptr;
+	T* pArray = nullptr;
 };
 
 int main()
 {
-	char buffer[256];
-
-	DynamicIntArray arr0( 5 );
-	arr0[0] = 69;
-	arr0[3] = 420;
-
-	chili::print( "Before bullshits, arr0[3]: " );
-	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
-	chili::print( buffer );
-	
-	{
-		DynamicIntArray arr1 = arr0;
-		arr1[3] = 1337;
-	}
-
-	chili::print( "\nAfter bullshits, arr0[3]: " );
-	chili::int2str( arr0[3],buffer,sizeof( buffer ) );
-	chili::print( buffer );
-
-	while( !_kbhit() );
+	dodb();
 	return 0;
 }
